@@ -1,0 +1,152 @@
+---
+title: "Visualization"
+output: html_notebook
+---
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("Gviz")
+```
+```{r}
+library(Gviz)
+library(dplyr)
+```
+
+```{r}
+gtf <- rtracklayer::import('merged.gtf')
+gtf_df=as.data.frame(gtf)
+```
+
+```{r}
+gtf_dg_gapdh <- gtf_df %>%
+  filter(gene_name=="GAPDHS"|transcript_id=='ENST00000229239')
+```
+
+```{r}
+gtf_dg_gapdh_exs <- filter(gtf_dg_gapdh, type=="exon")
+```
+
+```{r}
+library(GenomicRanges)
+data(gtf_dg_gapdh_exs)
+atrack <- AnnotationTrack(gtf_dg_gapdh_exs, name = "transcripts", chromosome = "12", options(ucscChromosomeNames=FALSE))
+gtrack <- GenomeAxisTrack()
+options(ucscChromosomeNames=FALSE)
+itrack <- IdeogramTrack(genome = "hg38", chromosome = "chr12")
+itrack@bandTable$chrom <- sub("chr", "", itrack@bandTable$chrom, ignore.case=T)
+itrack@chromosome<-"12"
+```
+
+
+```{r}
+bamfile <- "/Users/Пользователь/Desktop/diplom/bams_reg/melanoma_gapdh/gapdh_reg_SRR6916903_GSM3071650_LE.037.RG_M_Homo_sapiens_RNA-Seq.bam"
+options(ucscChromosomeNames=FALSE)
+```
+
+```{r}
+dTrack_mgs <- DataTrack(range = bamfile, genome = "hg38", name = "Coverage", type = "histogram", chromosome = "12", options(ucscChromosomeNames=FALSE), background.title = "#C1839F",  col.histogram = "#3c3c3c")
+class(dTrack_mgs)
+plotTracks(dTrack_mgs, from = 6534500, to = 6538400)
+```
+
+
+```{r}
+grtrack <- GeneRegionTrack(gtf_dg_gapdh_exs, genome = "hg38", chromosome = "12", 
+                           options(ucscChromosomeNames=FALSE),
+                           name = "transcripts",
+                           fill ="#FF5A5F",
+                           transcript = gtf_dg_gapdh_exs$transcript_id,
+                           showId=TRUE,
+                           exon = gtf_dg_gapdh_exs$exon_number,
+                           symbol = gtf_dg_gapdh_exs$transcript_id,
+                           #transcriptAnnotation = "transcripts",
+                           background.title = "#C1839F")
+#head(displayPars(grtrack))
+
+displayPars(grtrack) <- list(background.panel = "#F5F5F5", col = NULL)
+displayPars(dTrack_mgs) <- list(background.panel = "#F5F5F5", col = NULL)
+head(displayPars(grtrack))
+options(ucscChromosomeNames=FALSE)
+plotTracks(list(itrack, gtrack, grtrack, dTrack_mgs), chromosome="12",from = 6533000, to = 6539000)
+```
+
+
+
+```{r}
+levels(itrack@bandTable$chrom) <- sub("^chr", "", levels(itrack@bandTable$chrom))
+```
+
+
+
+```{r}
+gc = c("ENST00000222286",'ENST00000585510')
+gtf_dg_gapdhs <- gtf_df %>%
+  filter(transcript_id=="ENST00000222286"|transcript_id=='ENST00000585510')
+```
+
+```{r}
+gtf_dg_gapdhs_exs <- filter(gtf_dg_gapdhs, type=="exon")
+```
+
+
+
+
+```{r}
+bamfiles <- "/Users/Пользователь/Desktop/diplom/bams_reg/melanoma_gapdhs/gapdhs_reg_SRR6916903_GSM3071650_LE.037.RG_M_Homo_sapiens_RNA-Seq.bam"
+options(ucscChromosomeNames=FALSE)
+```
+
+```{r}
+dTrack_mgss <- DataTrack(range = bamfiles, genome = "hg38", name = "Coverage", type = "histogram", chromosome = "19", options(ucscChromosomeNames=FALSE), background.title = "#C1839F",  col.histogram = "#3c3c3c")
+class(dTrack_mgss)
+plotTracks(dTrack_mgss, from = 35535000, to = 35546400)
+```
+
+```{r}
+library(GenomicRanges)
+data(gtf_dg_gapdhs_exs)
+atracks <- AnnotationTrack(gtf_dg_gapdhs_exs, name = "transcripts", chromosome = "19", options(ucscChromosomeNames=FALSE))
+gtracks <- GenomeAxisTrack()
+options(ucscChromosomeNames=FALSE)
+itracks <- IdeogramTrack(genome = "hg38", chromosome = "chr19")
+itracks@bandTable$chrom <- sub("chr", "", itrack@bandTable$chrom, ignore.case=T)
+itracks@chromosome<-"19"
+```
+```{r}
+grtracks <- GeneRegionTrack(gtf_dg_gapdhs_exs, genome = "hg38", chromosome = "19", 
+                           options(ucscChromosomeNames=FALSE),
+                           name = "transcripts",
+                           fill = "#FF5A5F",
+                           transcript = gtf_dg_gapdhs_exs$transcript_id,
+                           showId=TRUE,
+                           exon = gtf_dg_gapdhs_exs$exon_number,
+                           symbol = gtf_dg_gapdhs_exs$transcript_id,
+                           #transcriptAnnotation = "transcripts",
+                           background.title = "#C1839F")
+#head(displayPars(grtrack))
+
+displayPars(grtracks) <- list(background.panel = "#F5F5F5", col = NULL)
+displayPars(dTrack_mgss) <- list(background.panel = "#F5F5F5", col = NULL)
+head(displayPars(grtracks))
+options(ucscChromosomeNames=FALSE)
+plotTracks(list(itracks, gtracks, grtracks, dTrack_mgss), chromosome="19",from = 35530000, to = 35546400)
+```
+
+
+```{r}
+library(GenomicFeatures)
+coverageByTranscript()
+```
+
+
+
+
+
+
+
+
+
+
+
